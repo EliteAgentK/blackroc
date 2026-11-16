@@ -3,6 +3,15 @@ const $ = (s, r = document) => r.querySelector(s), $$ = (s, r = document) => [..
 const calm = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const go = el => el && el.scrollIntoView({ behavior: calm ? 'auto' : 'smooth' });
 
+/* phones: the browser bar slides in and out while scrolling, which changes the window height. Layout reads a
+   steady screen height (the height with the bar showing) and only re-fits when the width really changes. */
+const steady = (() => { const d = document.createElement('div'); d.style.cssText = 'position:fixed;top:0;left:0;width:0;height:100svh;visibility:hidden;pointer-events:none'; document.documentElement.appendChild(d); return d; })();
+const screenH = () => steady.offsetHeight || innerHeight;
+let lastW = innerWidth;
+const desk = matchMedia('(hover:hover) and (pointer:fine)');
+const onWidth = fn => addEventListener('resize', () => { if (desk.matches || Math.abs(innerWidth - lastW) > 1) fn(); });
+addEventListener('resize', () => { requestAnimationFrame(() => { lastW = innerWidth; }); });
+
 /* header: clear over the hero, solid once you scroll (always solid on pages without a hero) */
 const head = $('.head'), hero = $('.hero'), dock = $('.dock');
 function bars() {
@@ -40,8 +49,8 @@ $$('.rv').forEach(el => io.observe(el));
 /* the rock and the material piles drift a little against the scroll */
 if (!calm) {
   const drift = [[$('.about .rock'), 46], [$('.piles'), 30]].filter(d => d[0]);
-  const move = () => drift.forEach(([el, amt]) => { const r = el.parentElement.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return;
-    const k = Math.min(Math.max((innerHeight - r.top) / (innerHeight + r.height), 0), 1); el.style.setProperty('--py', ((0.5 - k) * amt).toFixed(1) + 'px'); });
+  const move = () => drift.forEach(([el, amt]) => { const r = el.parentElement.getBoundingClientRect(); if (r.bottom < 0 || r.top > screenH()) return;
+    const k = Math.min(Math.max((screenH() - r.top) / (screenH() + r.height), 0), 1); el.style.setProperty('--py', ((0.5 - k) * amt).toFixed(1) + 'px'); });
   addEventListener('scroll', move, { passive: true }); move();
 }
 
@@ -105,7 +114,7 @@ if (art) {
     w = c.width = c.offsetWidth * d; h = c.height = c.offsetHeight * d;
     P = Array.from({ length: small() ? 30 : 64 }, () => ({ x: w * ((small() ? 0 : 0.36) + Math.random() * (small() ? 1 : 0.6)), y: Math.random() * h, r: (Math.random() * 1.4 + 0.4) * d, v: Math.random() * 0.2 + 0.05, p: Math.random() * 6.3, a: Math.random() * 0.5 + 0.12 }));
   }
-  size(); addEventListener('resize', size);
+  size(); onWidth(size);
   new IntersectionObserver(e => { on = e[0].isIntersecting; if (on) tick(); }).observe(c);
   function tick() {
     if (!on) return; x.clearRect(0, 0, w, h);
@@ -139,14 +148,14 @@ $$('.c-main .chips button').forEach((b, i) => b.style.setProperty('--n', i));
 /* the About rock drifts a little as you scroll */
 const fig = $('.about-fig img');
 if (fig && !calm) {
-  const move = () => { const r = fig.parentElement.getBoundingClientRect(); if (r.bottom < 0 || r.top > innerHeight) return; const p = (r.top + r.height / 2) / innerHeight - 0.5; fig.style.setProperty('--py', (p * -7).toFixed(2) + '%'); };
+  const move = () => { const r = fig.parentElement.getBoundingClientRect(); if (r.bottom < 0 || r.top > screenH()) return; const p = (r.top + r.height / 2) / screenH() - 0.5; fig.style.setProperty('--py', (p * -7).toFixed(2) + '%'); };
   addEventListener('scroll', move, { passive: true }); move();
 }
 
 /* on a phone the backdrop is sized to the stack */
 if (hero && art) {
   const fit = () => { hero.style.setProperty('--st', art.offsetTop + 'px'); hero.style.setProperty('--sh', art.offsetHeight + 'px'); };
-  fit(); addEventListener('resize', fit); addEventListener('load', fit);
+  fit(); onWidth(fit); addEventListener('load', fit);
 }
 
 /* light version: keep it while moving between pages */
@@ -165,12 +174,12 @@ function fitPhoneHero() {
   he.classList.add('measuring'); a.style.width = '0px';
   const others = he.offsetHeight;            /* everything except the stack */
   he.classList.remove('measuring');
-  const avail = innerHeight - others - 6;
+  const avail = screenH() - others - 6;
   const w = Math.max(120, Math.min(avail * 1160 / 1195, document.documentElement.clientWidth * 0.86));
   a.style.width = Math.round(w) + 'px';
 }
 fitPhoneHero();
-addEventListener('resize', fitPhoneHero);
+onWidth(fitPhoneHero);
 addEventListener('load', fitPhoneHero);
 if (document.fonts) document.fonts.ready.then(fitPhoneHero);
 
@@ -178,13 +187,13 @@ if (document.fonts) document.fonts.ready.then(fitPhoneHero);
    then dims and settles back as the page slides up over it */
 if (hero) {
   let hold = 0;
-  const measure = () => { hold = Math.min(0, innerHeight - hero.offsetHeight); hero.style.setProperty('--hold', hold + 'px'); };
+  const measure = () => { hold = Math.min(0, screenH() - hero.offsetHeight); hero.style.setProperty('--hold', hold + 'px'); };
   const cover = () => {
-    const start = Math.max(0, -hold), k = Math.min(Math.max((scrollY - start) / (innerHeight * 0.9), 0), 1);
+    const start = Math.max(0, -hold), k = Math.min(Math.max((scrollY - start) / (screenH() * 0.9), 0), 1);
     hero.style.setProperty('--cov', calm ? 0 : k.toFixed(3));
   };
   measure(); cover();
-  addEventListener('resize', () => { fitPhoneHero(); measure(); cover(); });
+  onWidth(() => { fitPhoneHero(); measure(); cover(); });
   addEventListener('load', () => { fitPhoneHero(); measure(); cover(); });
   addEventListener('scroll', cover, { passive: true });
 }
