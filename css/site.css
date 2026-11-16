@@ -1136,3 +1136,5 @@ a,button,[role=button],input,textarea{touch-action:manipulation}
 
 /* images carry width/height for a steady load; their CSS sets the width, so the height follows the picture */
 .about .rock,.piles,.pile{height:auto}
+/* desktop: a larger rock, set further into the corner so it never reaches the writing (measured at 880 to 2560 wide) */
+@media (min-width:861px){.about .rock{width:40rem;right:-4.5rem;bottom:-3.5rem}}
