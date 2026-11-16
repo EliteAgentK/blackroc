@@ -9,7 +9,7 @@ function bars() {
   head.classList.toggle('solid', !hero || scrollY > 40);
   if (dock) dock.classList.toggle('show', !hero || scrollY > hero.offsetHeight * 0.5);
 }
-addEventListener('scroll', bars, { passive: true }); bars();
+addEventListener('scroll', bars, { passive: true }); requestAnimationFrame(bars);
 
 /* mobile menu */
 const burger = $('.burger');
