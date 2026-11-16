@@ -94,11 +94,6 @@ if (art) {
   let cur = null;
   swM.forEach(b => b.onclick = () => { cur = cur === b.dataset.k ? null : b.dataset.k; lit(cur); if (cur) shake(cur); });
 
-  /* gentle pointer drift */
-  if (!calm && hover.matches) {
-    hero.addEventListener('pointermove', e => { const r = hero.getBoundingClientRect(), x = (e.clientX - r.left) / r.width - 0.5, y = (e.clientY - r.top) / r.height - 0.5; art.style.transform = `translate(${x * -12}px,${y * -8}px)`; });
-    hero.addEventListener('pointerleave', () => art.style.transform = '');
-  }
 }
 
 /* dust in the hero */
