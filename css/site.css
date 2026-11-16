@@ -1133,3 +1133,6 @@ a,button,[role=button],input,textarea{touch-action:manipulation}
   .hero>.facts .wrap{padding:0 .2rem}
   .hero>.facts .wrap>div,.hero>.facts .wrap>div:first-child,.hero>.facts .wrap>div:nth-child(even){padding-left:.35rem;padding-right:.15rem}
 }
+
+/* images carry width/height for a steady load; their CSS sets the width, so the height follows the picture */
+.about .rock,.piles,.pile{height:auto}
