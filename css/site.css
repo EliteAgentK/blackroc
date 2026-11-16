@@ -1138,3 +1138,8 @@ a,button,[role=button],input,textarea{touch-action:manipulation}
 .about .rock,.piles,.pile{height:auto}
 /* desktop: a larger rock, set further into the corner so it never reaches the writing (measured at 880 to 2560 wide) */
 @media (min-width:861px){.about .rock{width:40rem;right:-4.5rem;bottom:-3.5rem}}
+/* About: the label sits centred over the heading, a line either side */
+.about .ab-title{width:fit-content}
+.about .ab-title .eyebrow{justify-content:center;padding-left:.3em}
+.about .ab-title .eyebrow::before{content:"";width:3.4rem;height:1.5px;background:var(--copper);transform-origin:right;transition:transform 1.1s var(--ease) .15s}
+.rv .about .ab-title .eyebrow::before,.about.rv .ab-title .eyebrow::before{transform:scaleX(0)}
