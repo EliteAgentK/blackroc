@@ -1174,3 +1174,7 @@ a,button,[role=button],input,textarea{touch-action:manipulation}
   .facts-below b{display:block;font-family:var(--head);font-stretch:112%;font-weight:600;line-height:1.1;letter-spacing:-.02em;font-size:clamp(.82rem,4.2vw,1.08rem);white-space:nowrap}
   .facts-below small{display:block;font-size:clamp(.42rem,2vw,.5rem);font-weight:500;letter-spacing:.08em;line-height:1.35;margin-top:.3rem;text-transform:uppercase;color:var(--mute-d);overflow-wrap:anywhere}
 }
+/* product imagery (16 Nov set): phones show each material's own pile, full card width, as supplied: no fade mask */
+@media (max-width:860px){
+  .products .col img.pile{width:100%;max-width:none;margin:1rem 0 0;-webkit-mask-image:none;mask-image:none;filter:none}
+}
