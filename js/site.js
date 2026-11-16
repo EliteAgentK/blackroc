@@ -226,3 +226,13 @@ if (hero) {
     addEventListener('load', () => { scrollTo(0, 0); setTimeout(() => glide(() => targetY(el)), 250); });
   }
 })();
+
+/* very short phone screens: the key facts move from the hero to the top of About, so the stack keeps its room.
+   A copy is placed there once; CSS shows exactly one of the two. */
+(() => {
+  const f = document.querySelector('.hero>.facts'), wrap = document.querySelector('.about>.wrap');
+  if (!f || !wrap) return;
+  const c = f.cloneNode(true);
+  c.className = 'facts-below';
+  wrap.prepend(c);
+})();
