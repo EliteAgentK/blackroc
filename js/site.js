@@ -194,14 +194,16 @@ if (hero) {
   const headH = () => (head ? head.getBoundingClientRect().height : 0) - 1;
   const ease = t => t < .5 ? 16 * t ** 5 : 1 - Math.pow(-2 * t + 2, 5) / 2;
   let anim = 0;
-  function glide(y) {
+  function glide(aim) {
     cancelAnimationFrame(anim);
+    const y = typeof aim === 'function' ? aim() : aim;
     const from = scrollY, dist = y - from;
     if (calm || Math.abs(dist) < 2) { scrollTo(0, y); return; }
     const dur = Math.min(1700, 750 + Math.abs(dist) * 0.32), t0 = performance.now();
     const stop = () => cancelAnimationFrame(anim);
     addEventListener('wheel', stop, { once: true, passive: true }); addEventListener('touchstart', stop, { once: true, passive: true });
-    (function step(now) { const k = Math.min((now - t0) / dur, 1); scrollTo(0, from + dist * ease(k)); if (k < 1) anim = requestAnimationFrame(step); })(t0);
+    /* the header shrinks on the way down, so the landing point is re-read every frame */
+    (function step(now) { const k = Math.min((now - t0) / dur, 1), to = typeof aim === 'function' ? aim() : y; scrollTo(0, from + (to - from) * ease(k)); if (k < 1) anim = requestAnimationFrame(step); })(t0);
   }
   const targetY = el => {
     let top = 0, n = el;                       /* offsetTop ignores the sticky hero's hold, so walk the layout */
@@ -214,13 +216,13 @@ if (hero) {
     if (url.pathname !== location.pathname || !url.hash) return;
     const el = url.hash === '#top' ? document.body : document.querySelector(url.hash); if (!el) return;
     e.preventDefault();
-    const go = () => { glide(url.hash === '#top' ? 0 : targetY(el)); history.replaceState(null, '', url.hash); };
+    const go = () => { glide(url.hash === '#top' ? 0 : () => targetY(el)); history.replaceState(null, '', url.hash); };
     document.body.classList.contains('menu-open') ? setTimeout(go, 420) : go();
   });
   /* arriving from another page with an #anchor: start at the top, then glide down */
   if (location.hash && document.querySelector(location.hash)) {
     const el = document.querySelector(location.hash);
     history.scrollRestoration = 'manual';
-    addEventListener('load', () => { scrollTo(0, 0); setTimeout(() => glide(targetY(el)), 250); });
+    addEventListener('load', () => { scrollTo(0, 0); setTimeout(() => glide(() => targetY(el)), 250); });
   }
 })();
