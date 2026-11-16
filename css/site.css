@@ -1145,3 +1145,20 @@ a,button,[role=button],input,textarea{touch-action:manipulation}
 .rv .about .ab-title .eyebrow::before,.about.rv .ab-title .eyebrow::before{transform:scaleX(0)}
 /* About: a larger label over the single-line name */
 .about .ab-title .eyebrow{font-size:.95rem}
+/* phone hero: the stack gets the room. Swatches become a slim strip, the gaps close up, the facts card is tighter */
+@media (max-width:860px){
+  .sw button{aspect-ratio:auto;height:2.5rem;max-height:none}
+  .m-index{padding-top:.45rem;padding-bottom:.35rem}
+  .m-index p{margin-bottom:.4rem}
+  .m-cta{padding-top:.35rem}
+  .m-cta .btn{height:2.9rem}
+  .hero>.facts{margin-top:.6rem!important}
+  .hero>.facts .wrap>div,.hero>.facts .wrap>div:first-child,.hero>.facts .wrap>div:nth-child(even){padding-top:.55rem;padding-bottom:.5rem}
+  .copy h1{margin-top:.35rem}
+  .copy .rule{margin:.8rem 0 .55rem}
+}
+@media (max-width:860px) and (max-height:760px){
+  .m-cta .btn{height:2.6rem}
+  .sw button{height:2.2rem}
+}
+@media (max-width:860px) and (max-height:820px){.quote-line{font-size:clamp(2.1rem,10.4vw,2.85rem)}.hero{padding-bottom:.6rem}}

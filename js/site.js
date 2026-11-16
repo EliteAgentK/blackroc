@@ -165,8 +165,8 @@ function fitPhoneHero() {
   he.classList.add('measuring'); a.style.width = '0px';
   const others = he.offsetHeight;            /* everything except the stack */
   he.classList.remove('measuring');
-  const avail = innerHeight - others - 14;
-  const w = Math.max(120, Math.min(avail * 1160 / 1195, document.documentElement.clientWidth * 0.8));
+  const avail = innerHeight - others - 6;
+  const w = Math.max(120, Math.min(avail * 1160 / 1195, document.documentElement.clientWidth * 0.86));
   a.style.width = Math.round(w) + 'px';
 }
 fitPhoneHero();
