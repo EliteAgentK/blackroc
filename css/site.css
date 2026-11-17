@@ -1178,3 +1178,87 @@ a,button,[role=button],input,textarea{touch-action:manipulation}
 @media (max-width:860px){
   .products .col img.pile{width:100%;max-width:none;margin:1rem 0 0;-webkit-mask-image:none;mask-image:none;filter:none}
 }
+
+/* ================= ALIVE (17 Nov): motion in images and lines only; words stay still ================= */
+.about .rock-img{display:block;width:100%;height:auto}
+@media (max-width:860px){.about .rock{display:block}}
+/* 1. a warm glint passes over the rock face now and then */
+.about .rock::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:0;
+  background:linear-gradient(110deg,transparent 38%,rgba(255,206,160,.5) 50%,transparent 62%) 100% 0/320% 100% no-repeat;
+  -webkit-mask:url(../assets/rock.webp?v=44) center/100% 100% no-repeat;mask:url(../assets/rock.webp?v=44) center/100% 100% no-repeat;mix-blend-mode:screen}
+@keyframes glint{0%{background-position:100% 0;opacity:1}38%{background-position:0 0;opacity:1}39%,100%{background-position:0 0;opacity:0}}
+/* 2. the three copper lines draw one after another, then a light runs along them now and then */
+.panel .pillar:nth-child(1) .pl-head .ln{transition:transform 1.1s var(--ease) .8s}
+.panel .pillar:nth-child(2) .pl-head .ln{transition:transform 1.1s var(--ease) 1.5s}
+.panel .pillar:nth-child(3) .pl-head .ln{transition:transform 1.1s var(--ease) 2.2s}
+.pl-head .ln{position:relative;overflow:hidden}
+.pl-head .ln::after{content:"";position:absolute;top:0;bottom:0;left:0;width:30%;background:linear-gradient(90deg,transparent,#ffe2c8,transparent);transform:translateX(-110%)}
+@keyframes lnRun{0%{transform:translateX(-110%)}32%,100%{transform:translateX(360%)}}
+/* 3 + 4. desktop: one copy of the strip per material, each rising in turn; pointing at a column lights its pile */
+.piles{aspect-ratio:2172/376}
+.piles .pl{position:absolute;inset:0;display:block;width:100%;height:100%;transition:transform 1.3s var(--ease),opacity 1s var(--ease),filter .5s var(--ease);transition-delay:calc(.35s + var(--k) * .2s)}
+.piles .pl:nth-child(1){--k:0;clip-path:inset(0 79.7% 0 0%)}
+.piles .pl:nth-child(2){--k:1;clip-path:inset(0 60.17% 0 20.3%)}
+.piles .pl:nth-child(3){--k:2;clip-path:inset(0 38.9% 0 39.83%)}
+.piles .pl:nth-child(4){--k:3;clip-path:inset(0 26.150000000000006% 0 61.1%)}
+.piles .pl:nth-child(5){--k:4;clip-path:inset(0 0% 0 73.85%)}
+
+.products.rv .piles{transform:none;opacity:1}
+.products.rv .piles .pl{transform:translateY(3.2rem);opacity:0}
+.products.done .piles .pl{transition-delay:0s}
+/* once settled, one whole copy shows (no seams); pointing at a column dims the other piles through a soft-edged window */
+.products.done .piles .pl:first-child{clip-path:none}
+.products.done .piles .pl+.pl{visibility:hidden}
+@property --wl{syntax:'<percentage>';inherits:true;initial-value:0%}
+@property --wr{syntax:'<percentage>';inherits:true;initial-value:20%}
+.products .piles{transition:transform 2s var(--ease) .3s,opacity 1.6s var(--ease) .3s,--wl .55s var(--ease),--wr .55s var(--ease)}
+.piles::after{content:"";position:absolute;inset:0;z-index:1;pointer-events:none;opacity:0;
+  background:linear-gradient(90deg,rgba(18,14,11,.58) calc(var(--wl) - 5%),rgba(18,14,11,0) var(--wl),rgba(18,14,11,0) var(--wr),rgba(18,14,11,.58) calc(var(--wr) + 5%));
+  -webkit-mask:url(../assets/products/products-strip-2172.webp) center/100% 100% no-repeat;mask:url(../assets/products/products-strip-2172.webp) center/100% 100% no-repeat;
+  transition:opacity .5s var(--ease)}
+.piles.pick::after{opacity:1}
+/* 5. numbers 01-05 arrive in order, then the G chips */
+.products .col:nth-child(1){--c:0}.products .col:nth-child(2){--c:1}.products .col:nth-child(3){--c:2}.products .col:nth-child(4){--c:3}.products .col:nth-child(5){--c:4}
+.products .col .num.fx{transform-origin:left bottom;transition-delay:calc(.25s + var(--c) * .17s)}
+.products.rv .col .num.fx{transform:translateY(1.4rem) scale(.78)}
+.products.done .col .num.fx{transition-delay:0s}
+.g-tiles b{transition:transform .7s var(--ease),opacity .6s var(--ease),background .4s}
+.products.rv .g-tiles b{opacity:0;transform:translateY(.9rem)}
+.products:not(.done) .g-tiles b:nth-child(1){transition-delay:0.9s}
+.products:not(.done) .g-tiles b:nth-child(2){transition-delay:1.0s}
+.products:not(.done) .g-tiles b:nth-child(3){transition-delay:1.1s}
+.products:not(.done) .g-tiles b:nth-child(4){transition-delay:1.2s}
+.products:not(.done) .g-tiles b:nth-child(5){transition-delay:1.3s}
+
+/* phones: each card's pile rises as the card arrives; the card in the middle of the screen is lit */
+@media (max-width:860px){
+  html.alive .products .col img.pile{transition:transform 1.2s var(--ease),opacity 1s var(--ease),filter .6s var(--ease);filter:brightness(.8) saturate(.85)}
+  html.alive .products .col:not(.in) img.pile{opacity:0;transform:translateY(1.6rem)}
+  html.alive .products .col.mid img.pile{filter:none}
+}
+/* 6. order journey: the line fills, circles light up as it reaches them, a small truck drives along beneath */
+html.alive .journey.h i{background:transparent;color:var(--copper-l);box-shadow:inset 0 0 0 1.5px rgba(213,155,118,.6),0 0 0 .5rem var(--dark);transition:background .5s,color .5s,box-shadow .5s,transform .7s var(--ease),opacity .5s}
+html.alive .journey.h i.on{background:var(--copper);color:#fff;box-shadow:inset 0 0 0 1.5px var(--copper),0 0 0 .5rem var(--dark),0 0 1.3rem .2rem rgba(213,155,118,.45)}
+html.alive .journey.h li+li::before{background:linear-gradient(90deg,var(--copper-l) var(--jf,0%),rgba(243,236,228,.22) var(--jf,0%))}
+.j-row{position:relative}
+.jroad{position:absolute;height:1.5px;background:rgba(243,236,228,.14);pointer-events:none}
+.jroad .jfill{position:absolute;left:0;top:0;bottom:0;width:var(--jw,0px);background:linear-gradient(90deg,rgba(213,155,118,.25),var(--copper-l))}
+.jroad .jtruck{position:absolute;bottom:1px;left:var(--jw,0px);width:2.6rem;height:auto;transform:translateX(-50%);color:var(--copper-l);overflow:visible}
+html.alive .svc .byq{margin-top:4.4rem}
+html.light .jroad{background:rgba(20,20,22,.12)}
+html.light.alive .journey.h i{box-shadow:inset 0 0 0 1.5px rgba(188,122,85,.6),0 0 0 .5rem #f7f2ec;color:var(--copper)}
+html.light.alive .journey.h i.on{color:#fff;box-shadow:inset 0 0 0 1.5px var(--copper),0 0 0 .5rem #f7f2ec}
+html.light.alive .journey.h li+li::before{background:linear-gradient(90deg,var(--copper) var(--jf,0%),rgba(20,20,22,.18) var(--jf,0%))}
+/* the loops run only on screen, never for reduced motion, and stop on Pause */
+@media (prefers-reduced-motion:no-preference){
+  .about.live .rock::after{animation:glint 9s ease-in-out 2.8s infinite}
+  .about.live .pl-head .ln::after{animation:lnRun 8s ease-in-out infinite}
+  .about.live .pillar:nth-child(1) .ln::after{animation-delay:3.6s}
+  .about.live .pillar:nth-child(2) .ln::after{animation-delay:4.1s}
+  .about.live .pillar:nth-child(3) .ln::after{animation-delay:4.6s}
+  html.paused .about .rock::after,html.paused .pl-head .ln::after{animation-play-state:paused}
+}
+@media (prefers-reduced-motion:reduce){
+  .products.rv .piles .pl,.products.rv .g-tiles b,.products.rv .col .num.fx,html.alive .products .col img.pile{opacity:1!important;transform:none!important}
+  .pl-head .ln::after,.about .rock::after{display:none}
+}

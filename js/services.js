@@ -23,9 +23,13 @@
   for (let y = 66; y < 265; y += 12) r += `<path d="M45 ${y}H455" stroke="#c49a72" stroke-opacity=".32"/>`;
   rows.innerHTML = r;
 
+  /* dust: a few soft puffs behind the truck (drawn under it) */
+  const dust = document.createElementNS('http://www.w3.org/2000/svg', 'g'); dust.setAttribute('class', 'dust');
+  dust.setAttribute('fill', '#e0a887'); truck.parentNode.insertBefore(dust, truck);
+  const puffs = Array.from({ length: 12 }, () => dust.appendChild(document.createElementNS('http://www.w3.org/2000/svg', 'circle')));
   let paused = false, visible = false, last = 0, t = 0;
   new IntersectionObserver(es => { visible = es.some(x => x.isIntersecting); }).observe(sec);
-  if (btn) btn.onclick = () => { paused = !paused; btn.textContent = paused ? 'Play animations' : 'Pause animations'; btn.setAttribute('aria-pressed', String(paused)); };
+  if (btn) btn.onclick = () => { paused = !paused; document.documentElement.classList.toggle('paused', paused); btn.textContent = paused ? 'Play animations' : 'Pause animations'; btn.setAttribute('aria-pressed', String(paused)); };
 
   function draw(t) {
     const a = Math.sin(t * 0.8) * 9, b = Math.cos(t * 0.8) * 9;
@@ -35,6 +39,14 @@
     e1.setAttribute('cx', 15); e1.setAttribute('cy', 205 + a); e1d.setAttribute('cx', 15); e1d.setAttribute('cy', 205 + a);
     e2.setAttribute('cx', 485); e2.setAttribute('cy', 205 - a); e2d.setAttribute('cx', 485); e2d.setAttribute('cy', 205 - a);
     truck.setAttribute('transform', `translate(250 ${204 + Math.sin(t * 5.2) * 0.8})`);
+    /* dust kicked up behind the wheels, drifting back and fading */
+    puffs.forEach((c, i) => {
+      const age = (t * 0.85 + i / puffs.length) % 1, src = i % 2 ? 174 : 201;
+      c.setAttribute('cx', (src - age * 70).toFixed(1));
+      c.setAttribute('cy', (203 - age * 13 + Math.sin(i * 2.1 + t * 2) * 1.5).toFixed(1));
+      c.setAttribute('r', (1.3 + age * 4.6).toFixed(2));
+      c.setAttribute('opacity', (0.42 * (1 - age) * Math.min(1, age * 7)).toFixed(3));
+    });
     for (const w of wheels) w.setAttribute('transform', `rotate(${t * 360})`);
     /* clearance: starts about a quarter cleared, sweeps to fully clear, holds, fades back */
     const ph = (t % 7) / 7;

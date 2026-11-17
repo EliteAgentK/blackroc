@@ -245,3 +245,68 @@ if (hero) {
   c.className = 'facts-below';
   wrap.prepend(c);
 })();
+
+/* ===== alive (17 Nov): piles and materials linked, phone piles rise, order journey road, loops only on screen ===== */
+(() => {
+  document.documentElement.classList.add('alive');
+  const still = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  /* sections with ongoing loops run them only while on screen */
+  const live = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('live', e.isIntersecting)));
+  $$('.about,.products').forEach(s => live.observe(s));
+
+  /* desktop: pointing at a column lights its pile in the strip and dims the others */
+  const cols = $$('.products .col'), pls = $$('.piles .pl'), strip = $('.piles');
+  const edge = [0, 20.3, 39.83, 61.1, 73.85, 100];                  /* narrowest points between the piles in the strip */
+  const pick = k => { if (!strip) return; strip.classList.toggle('pick', k != null);
+    if (k != null) { strip.style.setProperty('--wl', (k ? edge[k] - 2 : -10) + '%'); strip.style.setProperty('--wr', (k < 4 ? edge[k + 1] + 2 : 110) + '%'); } };
+  cols.forEach((c, i) => {
+    c.addEventListener('pointerenter', e => { if (e.pointerType === 'mouse') pick(i); });
+    c.addEventListener('pointerleave', e => { if (e.pointerType === 'mouse') pick(null); });
+    c.addEventListener('focus', () => pick(i)); c.addEventListener('blur', () => pick(null));
+  });
+  /* phones: each card's pile rises as the card arrives; the card in the middle band of the screen is lit */
+  const arrive = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); arrive.unobserve(e.target); } }), { threshold: 0.25 });
+  const mid = new IntersectionObserver(es => es.forEach(e => e.target.classList.toggle('mid', e.isIntersecting)), { rootMargin: '-35% 0px -35% 0px' });
+  cols.forEach(c => { if (still) c.classList.add('in', 'mid'); else { arrive.observe(c); mid.observe(c); } });
+
+  /* order journey: a road under the three steps; as you scroll it fills, the truck drives along it
+     and each circle lights when the truck reaches it. The words never move. */
+  const row = $('.j-row'), ol = $('.journey.h');
+  if (!row || !ol) return;
+  const lis = $$('li', ol), dots = lis.map(l => $('i', l));
+  const road = document.createElement('span'); road.className = 'jroad'; road.setAttribute('aria-hidden', 'true');
+  road.innerHTML = '<span class="jfill"></span><svg class="jtruck" viewBox="0 0 44 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"><path d="M2 17V6h24v11M26 9h8l6 6v2H26"/><path d="M28 10.5h5l3.5 4H28z" stroke-width="1.2"/><path d="M4 6c2-3 5-4 8-2c3-3 8-3 11 0" stroke-width="1.3"/><g class="w1" transform="translate(9 19)"><circle r="3.6" fill="var(--dark)"/><path d="M-2.2 0H2.2M0 -2.2V2.2" stroke-width="1.1"/></g><g class="w2" transform="translate(33 19)"><circle r="3.6" fill="var(--dark)"/><path d="M-2.2 0H2.2M0 -2.2V2.2" stroke-width="1.1"/></g></svg>';
+  row.appendChild(road);
+  const w1 = $('.w1', road), w2 = $('.w2', road);
+  let geo = null;
+  function measure() {                /* settled layout (offsets), so the steps sliding in never skew it */
+    const ox = ol.offsetLeft, oy = ol.offsetTop;
+    const one = lis.every(l => Math.abs(l.offsetTop - lis[0].offsetTop) < 4);   /* all three steps on one line */
+    road.style.display = one ? '' : 'none';
+    const cx = lis.map((l, k) => ox + l.offsetLeft + dots[k].offsetLeft + dots[k].offsetWidth / 2);
+    const conns = lis.slice(1).map(l => { const s = getComputedStyle(l, '::before'); return [ox + l.offsetLeft + parseFloat(s.marginLeft), parseFloat(s.width)]; });
+    const top = oy + Math.max(...lis.map(l => l.offsetTop + l.offsetHeight)) + 34;
+    road.style.left = cx[0] + 'px'; road.style.width = (cx[2] - cx[0]) + 'px'; road.style.top = top + 'px';
+    geo = { one, x0: cx[0], x1: cx[2], cx, conns };
+  }
+  function update() {
+    if (!geo) return;
+    const r = ol.getBoundingClientRect(), H = screenH();
+    const p = still ? 1 : Math.min(Math.max((H * 0.9 - r.top) / (H * 0.42), 0), 1);
+    if (!geo.one) {                    /* the steps wrap onto two lines (narrow phones): no road, the steps light in turn */
+      dots.forEach((d, i) => d.classList.toggle('on', p >= i * 0.45));
+      lis.slice(1).forEach((l, i) => l.style.setProperty('--jf', (Math.min(Math.max((p - i * 0.45) / 0.45, 0), 1) * 100).toFixed(1) + '%'));
+      return;
+    }
+    const x = geo.x0 + (geo.x1 - geo.x0) * p;                           /* truck position, in row coordinates */
+    road.style.setProperty('--jw', (x - geo.x0) + 'px');
+    const turn = `rotate(${((x - geo.x0) / 3.6 * 57.3).toFixed(1)})`;
+    w1.setAttribute('transform', 'translate(9 19) ' + turn); w2.setAttribute('transform', 'translate(33 19) ' + turn);
+    dots.forEach((d, i) => d.classList.toggle('on', x >= geo.cx[i] - 2));
+    geo.conns.forEach(([L, W], i) => lis[i + 1].style.setProperty('--jf', (Math.min(Math.max((x - L) / W, 0), 1) * 100).toFixed(1) + '%'));
+  }
+  const refit = () => { measure(); update(); };
+  refit(); onWidth(refit); addEventListener('load', refit);
+  if (document.fonts) document.fonts.ready.then(refit);
+  addEventListener('scroll', update, { passive: true });
+})();
